@@ -17,13 +17,16 @@ import verifyOtp from './routes/auth/verify-otp.js'
 import shopProductOrders from './routes/shop/productOrders.js'
 import sellerProductOrders from './routes/seller/productOrders.js'
 import adminProductOrders from './routes/admin/productOrders.js'
+import messageRoutes from './routes/message.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 dotenv.config({ path: path.resolve(__dirname, '.env') })
 
-connectDB()
+connectDB().catch((error) => {
+    console.error('MongoDB connection failed:', error)
+})
 
 const app = express()
 const httpServer = createServer(app)
@@ -31,6 +34,8 @@ const httpServer = createServer(app)
 const allowedOrigins = new Set([
     'http://localhost:3000',
     'http://127.0.0.1:3000',
+    'https://eventsora.com',
+    'https://www.eventsora.com',
     process.env.FRONTEND_URL,
     process.env.NEXT_PUBLIC_FRONTEND_URL,
 ].filter(Boolean))
@@ -68,6 +73,7 @@ app.set('io', io)
 app.use('/api/shop', shopProductOrders)
 app.use('/api/seller', sellerProductOrders)
 app.use('/api/admin', adminProductOrders)
+app.use('/api/message', messageRoutes)
 
 io.use(async (socket, next) => {
     try {
